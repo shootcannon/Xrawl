@@ -64,12 +64,12 @@ detect_from_vhost() {
     
     for vhost_path in "${vhost_paths[@]}"; do
         if [ -d "$vhost_path" ]; then
-            for file in "$vhost_path"*.conf 2>/dev/null; do
+            for file in "$vhost_path"*.conf; do
                 if [ -f "$file" ]; then
                     domains+=($(grep -E "^[[:space:]]*ServerName|^[[:space:]]*ServerAlias" "$file" 2>/dev/null | awk '{print $2}'))
                     domains+=($(grep -E "server_name" "$file" 2>/dev/null | awk '{print $2}' | tr -d ';'))
                 fi
-            done
+            done 2>/dev/null
         fi
     done
     
@@ -121,12 +121,12 @@ detect_from_logs() {
     )
     
     for log_pattern in "${log_files[@]}"; do
-        for log_file in $log_pattern 2>/dev/null; do
+        for log_file in $log_pattern; do
             if [ -f "$log_file" ]; then
                 domain=$(basename "$log_file" | sed 's/\.[^.]*$//')
                 domains+=("$domain")
             fi
-        done
+        done 2>/dev/null
     done
     
     printf '%s\n' "${domains[@]}" | sort -u
